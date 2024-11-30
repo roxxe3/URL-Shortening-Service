@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import json
 
 
@@ -18,6 +18,14 @@ class Short_url:
         urls_dict["accessCount"] = 0
         return urls_dict
 
-    def save_file(dict):
+    def save_file(self, new_url_dict):
+        try:
+            with open("data.json", "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            data = []
+
+        data.append(new_url_dict)
+
         with open("data.json", "w") as file:
-            json.dump(dict, file, indent=4) 
+            json.dump(data, file, indent=4)
