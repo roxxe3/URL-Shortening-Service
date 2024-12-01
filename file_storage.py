@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import json
 
 
@@ -13,7 +14,7 @@ class Short_url:
         urls_dict = {}
         urls_dict["id"] = self.id
         urls_dict["url"] = self.url
-        urls_dict["shortCode"] = self.createdAt
+        urls_dict["createdAt"] = self.createdAt
         urls_dict["updatedAt"] = self.updatedAt
         urls_dict["accessCount"] = 0
         return urls_dict
