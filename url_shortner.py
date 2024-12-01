@@ -1,16 +1,18 @@
-from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import RedirectResponse, HTMLResponse
 import hashlib
 from file_storage import Short_url
 import json
 import urllib.parse
 from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
 
 
 class URLRequest(BaseModel):
     url: str
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
 def get_short_url(shortcode):
     with open("data.json", "r") as file:
@@ -28,20 +30,19 @@ def generate_id(url):
     return short_id
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/", response_class=HTMLResponse)
+async def render_form(request: Request):
+    return templates.TemplateResponse("form.html", {"request": request})
 
 @app.post("/shorten")
-async def shorten(request: URLRequest):
-    decoded_url = urllib.parse.unquote(request.url)
-    short_id = generate_id(decoded_url)
-    short_url = Short_url(short_id, decoded_url)
+async def shorten(url: str = Form(...)):
+    short_id = generate_id(url)
+    short_url = Short_url(short_id, url)
     url_dict = short_url.create_dict()
     short_url.save_file(url_dict)
     return {"message": short_id}
 
-@app.get("/shorten/{shortCode}")
+@app.get("/{shortCode}")
 async def get_url(shortCode: str):
     url = get_short_url(shortCode)
     return RedirectResponse(url=url, status_code=302)
