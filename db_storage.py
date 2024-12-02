@@ -1,29 +1,53 @@
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from pymongo import MongoClient
 from datetime import datetime
-from typing import Annotated
-from fastapi import Depends, FastAPI, HTTPException, Query
+import json
 
+# Connect to the local MongoDB server
+client = MongoClient("mongodb://localhost:27017/")
 
-class short_url_db(SQLModel, table=True):
-    id: str = Field(default=None, primary_key=True)
-    url: str = Field(index=True)
-    createdAt: str = Field()
-    updatedAt: str = Field()
-    accessCount: int = Field(default=None, index=True)
+# Create or access a database
+db = client['mydatabase']
 
+# Create or access a collection (similar to a table in SQL)
+collection = db['urls']
 
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+print("Connected to MongoDB locally!")
 
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args)
+class Short_url:
+    def __init__(self ,id , url):
+        self.id = id
+        self.url = url
+        self.createdAt = datetime.now().strftime('%Y-%m-%d %H:%M')
+        self.updatedAt = datetime.now().strftime('%Y-%m-%d %H:%M')
 
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+    def create_dict(self):
+        urls_dict = {}
+        urls_dict["_id"] = self.id
+        urls_dict["url"] = self.url
+        urls_dict["createdAt"] = self.createdAt
+        urls_dict["updatedAt"] = self.updatedAt
+        urls_dict["accessCount"] = 0
+        return urls_dict
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+    def save_file(self, new_url_dict):
+        try:
+            with open("data.json", "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            data = []
 
+        data.append(new_url_dict)
 
-SessionDep = Annotated[Session, Depends(get_session)]
+        with open("data.json", "w") as file:
+            json.dump(data, file, indent=4)
+    
+    def save_to_db(self, new_url_dict):
+        result = collection.insert_one(new_url_dict)
+        print("Inserted task with ID:", result.inserted_id)
+    @classmethod
+    def find_url(cls, shortcode):
+        url_dict = collection.find_one({"_id": shortcode})
+        if url_dict is None:
+            raise ValueError("Shortcode not found")
+        collection.update_one({"_id": shortcode}, {"$inc": {"accessCount": 1}})
+        return url_dict["url"]

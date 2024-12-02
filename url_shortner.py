@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import RedirectResponse, HTMLResponse
 import hashlib
-from file_storage import Short_url
+from db_storage import Short_url
 import json
-import urllib.parse
 from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
+import db_storage
 
 
 class URLRequest(BaseModel):
@@ -37,13 +37,15 @@ async def render_form(request: Request):
 @app.post("/shorten")
 async def shorten(url: str = Form(...)):
     short_id = generate_id(url)
-    short_url = Short_url(short_id, url)
+    short_url = db_storage.Short_url(short_id, url)
     url_dict = short_url.create_dict()
     short_url.save_file(url_dict)
+    short_url.save_to_db(url_dict)  # Call the save_to_db function
     return {"message": short_id}
 
-@app.get("/{shortCode}")
+@app.get("/shorten/{shortCode}")
 async def get_url(shortCode: str):
-    url = get_short_url(shortCode)
+    # url = get_short_url(shortCode)
+    url=Short_url.find_url(shortCode)
     return RedirectResponse(url=url, status_code=302)
 

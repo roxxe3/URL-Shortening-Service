@@ -12,7 +12,7 @@ class Short_url:
 
     def create_dict(self):
         urls_dict = {}
-        urls_dict["id"] = self.id
+        urls_dict["_id"] = self.id
         urls_dict["url"] = self.url
         urls_dict["createdAt"] = self.createdAt
         urls_dict["updatedAt"] = self.updatedAt
