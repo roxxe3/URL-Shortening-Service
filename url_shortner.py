@@ -58,3 +58,8 @@ async def update_url(shortCode, url):
 async def get_stats(shortCode):
     data=Short_url.find_url(shortCode)
     return data
+
+@app.delete("/shorten/{shortCode}")
+async def delete_url(shortCode):
+    Short_url.delete_url(shortCode)
+    return {"message": "URL deleted successfully"}

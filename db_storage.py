@@ -59,3 +59,8 @@ class Short_url:
             "accessCount": 0}
             })
         return data
+    
+    @classmethod
+    def delete_url(cls, shortcode):
+        collection.delete_one({"_id": shortcode})
+        return True
