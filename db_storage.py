@@ -53,14 +53,26 @@ class Short_url:
         return url_dict
     @classmethod
     def update_url(cls, shortcode, new_url):
-        data =collection.update_one({"_id": shortcode}, {"$set": {
-            "url": new_url,
-            "updatedAt": datetime.now().strftime('%Y-%m-%d %H:%M'),
-            "accessCount": 0}
+        try:
+            result = collection.update_one({"_id": shortcode}, {"$set": {
+                "url": new_url,
+                "updatedAt": datetime.now().strftime('%Y-%m-%d %H:%M'),
+                "accessCount": 0}
             })
-        return data
+            if result.matched_count == 0:
+                raise ValueError("Shortcode not found")
+            return result
+        except Exception as e:
+            print(f"Error updating URL: {e}")
+            raise
     
     @classmethod
     def delete_url(cls, shortcode):
-        collection.delete_one({"_id": shortcode})
-        return True
+        try:
+            result = collection.delete_one({"_id": shortcode})
+            if result.deleted_count == 0:
+                raise ValueError("Shortcode not found")
+            return True
+        except Exception as e:
+            print(f"Error deleting URL: {e}")
+            raise
