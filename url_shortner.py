@@ -40,12 +40,16 @@ async def shorten(url: str = Form(...)):
     short_url = db_storage.Short_url(short_id, url)
     url_dict = short_url.create_dict()
     short_url.save_file(url_dict)
-    short_url.save_to_db(url_dict)  # Call the save_to_db function
+    short_url.save_to_db(url_dict)
     return {"message": short_id}
 
 @app.get("/shorten/{shortCode}")
 async def get_url(shortCode: str):
-    # url = get_short_url(shortCode)
-    url=Short_url.find_url(shortCode)
-    return RedirectResponse(url=url, status_code=302)
+    data=Short_url.find_url(shortCode)
+    return RedirectResponse(url=data["url"], status_code=302)
 
+@app.put("/shorten/{shortCode}")
+async def update_url(shortCode, url):
+    db_storage.Short_url.update_url(shortCode, url)
+    data=Short_url.find_url(shortCode)
+    return {"message": "URL updated successfully", "result": data}

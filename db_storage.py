@@ -50,4 +50,9 @@ class Short_url:
         if url_dict is None:
             raise ValueError("Shortcode not found")
         collection.update_one({"_id": shortcode}, {"$inc": {"accessCount": 1}})
-        return url_dict["url"]
+        return url_dict
+    @classmethod
+    def update_url(cls, shortcode, new_url):
+
+        data =collection.update_one({"_id": shortcode}, {"$set": {"url": new_url}})
+        return data
