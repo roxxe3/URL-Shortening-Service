@@ -53,6 +53,9 @@ class Short_url:
         return url_dict
     @classmethod
     def update_url(cls, shortcode, new_url):
-
-        data =collection.update_one({"_id": shortcode}, {"$set": {"url": new_url}})
+        data =collection.update_one({"_id": shortcode}, {"$set": {
+            "url": new_url,
+            "updatedAt": datetime.now().strftime('%Y-%m-%d %H:%M'),
+            "accessCount": 0}
+            })
         return data

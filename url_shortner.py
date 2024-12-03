@@ -53,3 +53,8 @@ async def update_url(shortCode, url):
     db_storage.Short_url.update_url(shortCode, url)
     data=Short_url.find_url(shortCode)
     return {"message": "URL updated successfully", "result": data}
+
+@app.get("/shorten/{shortCode}/stats")
+async def get_stats(shortCode):
+    data=Short_url.find_url(shortCode)
+    return data
