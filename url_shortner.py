@@ -6,12 +6,26 @@ import json
 from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
 import db_storage
+from fastapi.middleware.cors import CORSMiddleware
+origins = [
+    "http://localhost",  # You can add more origins here
+    "http://127.0.0.1",
+]
+
 
 
 class URLRequest(BaseModel):
     url: str
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 templates = Jinja2Templates(directory="templates")
 
 def get_short_url(shortcode):
